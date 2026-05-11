@@ -1,0 +1,702 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <title>Für dich, Mama ❤️</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Pinyon+Script&family=Jost:wght@300;400&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --rose:    #c9748a;
+      --blush:   #e8b4bf;
+      --petal:   #f2d0d8;
+      --cream:   #fdf6f0;
+      --altrosa: #b5687c;
+      --gold:    #d4a96a;
+      --text:    #4a2a33;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { background: var(--cream); font-family: 'Jost', sans-serif; color: var(--text); overflow-x: hidden; }
+
+    /* ── INTRO VIDEO SECTION ── */
+    #intro {
+      width: 100%;
+      height: 100vh;
+      position: relative;
+      overflow: hidden;
+      background: #0a0a0a;
+    }
+    #intro-stage {
+      position: absolute;
+      inset: 0;
+    }
+    #anim-root {
+      position: absolute;
+      inset: 0;
+    }
+
+    /* ── SCROLL HINT ── */
+    .scroll-hint {
+      position: absolute;
+      bottom: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      z-index: 10;
+      opacity: 0;
+      animation: fade-up 1s 4s forwards;
+    }
+    .scroll-hint span {
+      font-size: 0.65rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: rgba(255,220,200,0.6);
+    }
+    .scroll-line {
+      width: 1px;
+      height: 48px;
+      background: linear-gradient(to bottom, rgba(255,220,200,0.5), transparent);
+      animation: line-pulse 2s 4.5s ease-in-out infinite;
+    }
+    @keyframes line-pulse {
+      0%, 100% { opacity: 1; transform: scaleY(1); }
+      50%       { opacity: 0.3; transform: scaleY(0.5); }
+    }
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+      to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
+    /* ── MESSAGES SECTION ── */
+    #messages {
+      background: var(--cream);
+      padding: 80px 0 0;
+    }
+
+    .section-divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      padding: 0 40px 60px;
+    }
+    .divider-line {
+      flex: 1;
+      max-width: 140px;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--blush));
+    }
+    .divider-line.r { background: linear-gradient(to left, transparent, var(--blush)); }
+    .divider-icon { color: var(--rose); font-size: 1rem; }
+
+    .messages-wrapper {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 32px 80px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .message-card {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 56px;
+      align-items: center;
+      padding: 64px 0;
+      border-bottom: 1px solid #e8d5da44;
+      opacity: 0;
+      transform: translateY(48px);
+      transition: opacity 0.9s ease, transform 0.9s ease;
+    }
+    .message-card.visible { opacity: 1; transform: translateY(0); }
+    .message-card:last-of-type { border-bottom: none; }
+    .message-card.reverse { direction: rtl; }
+    .message-card.reverse > * { direction: ltr; }
+
+    .msg-text-side { display: flex; flex-direction: column; gap: 20px; }
+
+    .msg-number {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 4.5rem;
+      font-weight: 300;
+      color: var(--petal);
+      line-height: 1;
+    }
+
+    .msg-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.15rem, 2.2vw, 1.45rem);
+      font-weight: 400;
+      line-height: 1.8;
+      color: var(--text);
+    }
+
+    .msg-image-side {
+      border-radius: 2px;
+      overflow: hidden;
+      aspect-ratio: 4/5;
+      background: linear-gradient(135deg, var(--petal), var(--blush));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      box-shadow: 0 12px 40px rgba(180,100,120,0.12);
+    }
+    .msg-image-side img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* ── FINALE ── */
+    #finale {
+      background: linear-gradient(160deg, #f7e4ea, #fdf0f4 55%, var(--cream));
+      padding: 110px 32px 120px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 1.1s ease, transform 1.1s ease;
+    }
+    #finale.visible { opacity: 1; transform: translateY(0); }
+
+    .finale-glow {
+      position: absolute;
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, #f0bfcc44, transparent 65%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      filter: blur(60px);
+      pointer-events: none;
+    }
+    .finale-content {
+      position: relative;
+      z-index: 1;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .finale-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--altrosa);
+      margin-bottom: 36px;
+    }
+    .finale-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.3rem, 3vw, 2rem);
+      font-weight: 300;
+      line-height: 1.85;
+      color: var(--text);
+    }
+    .finale-heart {
+      display: inline-block;
+      font-size: 2.8rem;
+      margin-top: 44px;
+      animation: heartbeat 1.6s ease-in-out infinite;
+    }
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1); }
+      14%       { transform: scale(1.18); }
+      28%       { transform: scale(1); }
+      42%       { transform: scale(1.12); }
+    }
+    .finale-sig {
+      margin-top: 32px;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 1.2rem;
+      color: var(--rose);
+      opacity: 0.8;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      .message-card { grid-template-columns: 1fr; gap: 28px; padding: 48px 0; }
+      .message-card.reverse { direction: ltr; }
+      .msg-image-side { aspect-ratio: 3/2; }
+    }
+  </style>
+
+  <!-- React + Babel (for the animation) -->
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin></script>
+</head>
+<body>
+
+<!-- ═══ INTRO ANIMATION ═══ -->
+<section id="intro">
+  <div id="intro-stage">
+    <div id="anim-root"></div>
+  </div>
+  <div class="scroll-hint">
+    <span>scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- ═══ MESSAGES ═══ -->
+<section id="messages">
+  <div class="section-divider">
+    <div class="divider-line"></div>
+    <span class="divider-icon">✦</span>
+    <div class="divider-line r"></div>
+  </div>
+
+  <div class="messages-wrapper">
+
+    <div class="message-card" data-reveal>
+      <div class="msg-text-side">
+        <div class="msg-number">01</div>
+        <p class="msg-text">
+          Danke Mama, dass du uns das Leben so einfach wie möglich machen möchtest und uns verwöhnst.
+        </p>
+      </div>
+      <div class="msg-image-side">
+        <img src="foto1.jpg" alt="Erinnerung 1" />
+      </div>
+    </div>
+
+    <div class="message-card reverse" data-reveal>
+      <div class="msg-text-side">
+        <div class="msg-number">02</div>
+        <p class="msg-text">
+          Danke Mama, dass du uns trotz der vielen Arbeit, die du hast, so oft so lecker kochst, so oft mit Bailey gehst und unseren Haushalt zuhause im Griff hältst.
+        </p>
+      </div>
+      <div class="msg-image-side">
+        <img src="foto2.jpg" alt="Erinnerung 2" />
+      </div>
+    </div>
+
+    <div class="message-card" data-reveal>
+      <div class="msg-text-side">
+        <div class="msg-number">03</div>
+        <p class="msg-text">
+          Danke Mama, dass du dich mit Ana so gut verstehst.
+        </p>
+      </div>
+      <div class="msg-image-side">
+        <img src="foto3.jpg" alt="Erinnerung 3" />
+      </div>
+    </div>
+
+    <div class="message-card reverse" data-reveal>
+      <div class="msg-text-side">
+        <div class="msg-number">04</div>
+        <p class="msg-text">
+          Danke Mama, dass du immer für uns da bist, wenn wir dich brauchen — auch wenn wir mal nicht so lieb zu dir sind.
+        </p>
+      </div>
+      <div class="msg-image-side">
+        <img src="foto4.jpg" alt="Erinnerung 4" />
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══ FINALE ═══ -->
+<section id="finale" data-reveal>
+  <div class="finale-glow"></div>
+  <div class="finale-content">
+    <p class="finale-label">Von uns für dich</p>
+    <p class="finale-text">
+      Das alles ist überhaupt nicht selbstverständlich.<br/>
+      Wir lieben dich, Mama.
+    </p>
+    <div class="finale-heart">❤️</div>
+    <p class="finale-sig">— Rico &amp; Ana</p>
+  </div>
+</section>
+
+<!-- ═══ ANIMATION SCRIPTS (inline) ═══ -->
+<script type="text/babel">
+// ── animations.jsx (inline) ──────────────────────────────────────────────
+const Easing = {
+  linear: (t) => t,
+  easeInQuad:    (t) => t * t,
+  easeOutQuad:   (t) => t * (2 - t),
+  easeInCubic:    (t) => t * t * t,
+  easeOutCubic:   (t) => (--t) * t * t + 1,
+  easeInOutCubic: (t) => (t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1),
+  easeInQuart:    (t) => t * t * t * t,
+  easeOutQuart:   (t) => 1 - (--t) * t * t * t,
+  easeInSine:    (t) => 1 - Math.cos((t * Math.PI) / 2),
+  easeOutSine:   (t) => Math.sin((t * Math.PI) / 2),
+  easeInOutSine: (t) => -(Math.cos(Math.PI * t) - 1) / 2,
+  easeOutBack: (t) => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); },
+  easeInBack:  (t) => { const c1 = 1.70158, c3 = c1 + 1; return c3 * t * t * t - c1 * t * t; },
+  easeInOutBack:(t) => { const c1=1.70158,c2=c1*1.525; return t<0.5?(Math.pow(2*t,2)*((c2+1)*2*t-c2))/2:(Math.pow(2*t-2,2)*((c2+1)*(t*2-2)+c2)+2)/2; },
+  easeOutElastic:(t)=>{ const c4=(2*Math.PI)/3; if(t===0)return 0; if(t===1)return 1; return Math.pow(2,-10*t)*Math.sin((t*10-0.75)*c4)+1; },
+};
+
+const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+
+const TimelineContext = React.createContext({ time: 0, duration: 10, playing: false });
+const useTime = () => React.useContext(TimelineContext).time;
+const useTimeline = () => React.useContext(TimelineContext);
+
+// ── Stage ────────────────────────────────────────────────────────────────
+function Stage({ width=1920, height=1080, duration=20, background='#f5d4c8', loop=true, autoplay=true, children }) {
+  const [time, setTime] = React.useState(0);
+  const [playing, setPlaying] = React.useState(autoplay);
+  const rafRef = React.useRef(null);
+  const lastTsRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if (!playing) { lastTsRef.current = null; return; }
+    const step = (ts) => {
+      if (lastTsRef.current == null) lastTsRef.current = ts;
+      const dt = (ts - lastTsRef.current) / 1000;
+      lastTsRef.current = ts;
+      setTime((t) => {
+        let next = t + dt;
+        if (next >= duration) { if (loop) next = next % duration; else { next = duration; setPlaying(false); } }
+        return next;
+      });
+      rafRef.current = requestAnimationFrame(step);
+    };
+    rafRef.current = requestAnimationFrame(step);
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); lastTsRef.current = null; };
+  }, [playing, duration, loop]);
+
+  const ctxValue = React.useMemo(() => ({ time, duration, playing, setTime, setPlaying }), [time, duration, playing]);
+
+  return (
+    <div style={{ position:'absolute', inset:0, overflow:'hidden', background }}>
+      <TimelineContext.Provider value={ctxValue}>
+        {children}
+      </TimelineContext.Provider>
+    </div>
+  );
+}
+
+// ── flowers.jsx (inline) ─────────────────────────────────────────────────
+const FLOWER_PALETTES = {
+  blush:   { petalOuter:'#f4cdc6', petalInner:'#fbe6e1', petalEdge:'#dca5a0', centerInner:'#f3d488', centerOuter:'#c98c4b' },
+  rose:    { petalOuter:'#d97a7a', petalInner:'#f0aeae', petalEdge:'#a85a5a', centerInner:'#f3d488', centerOuter:'#a8632a' },
+  cream:   { petalOuter:'#f8e6d0', petalInner:'#fdf6ec', petalEdge:'#e0c8a8', centerInner:'#f0c170', centerOuter:'#b07a36' },
+  antique: { petalOuter:'#c89090', petalInner:'#e8c6c1', petalEdge:'#9a6b6b', centerInner:'#eec07a', centerOuter:'#a06530' },
+};
+
+function Petal({ angle, length, width, scale=1, palette, opacity=1 }) {
+  return (
+    <g transform={`rotate(${angle}) translate(0 ${-length*0.55}) scale(${scale})`} opacity={opacity}>
+      <ellipse cx={0} cy={length*0.15} rx={width*0.55} ry={length*0.62} fill={palette.petalEdge} opacity={0.35} filter="url(#flowerSoft)" />
+      <ellipse cx={0} cy={0} rx={width*0.5} ry={length*0.55} fill={`url(#petalGrad-${palette.id})`} />
+      <ellipse cx={-width*0.08} cy={-length*0.18} rx={width*0.18} ry={length*0.22} fill={palette.petalInner} opacity={0.7} filter="url(#flowerSoft)" />
+    </g>
+  );
+}
+
+function Flower({ x, y, size=220, petals=6, paletteName='blush', bloom=1, sway=0, rotation=0, opacity=1, layered=true }) {
+  const palette = { ...FLOWER_PALETTES[paletteName], id: paletteName };
+  const petalLen = size * 0.5;
+  const petalWid = size * 0.34;
+  const outer = [];
+  for (let i = 0; i < petals; i++) {
+    const angle = (i / petals) * 360 + sway * 6;
+    const stagger = i * 0.06;
+    const localBloom = clamp((bloom - stagger) / (1 - stagger * 0.5), 0, 1);
+    const eased = Easing.easeOutBack(localBloom);
+    outer.push(<Petal key={`o-${i}`} angle={angle} length={petalLen} width={petalWid} scale={eased} palette={palette} opacity={localBloom} />);
+  }
+  const inner = [];
+  if (layered) {
+    const innerCount = petals;
+    for (let i = 0; i < innerCount; i++) {
+      const angle = (i / innerCount) * 360 + 30 + sway * 4;
+      const stagger = 0.25 + i * 0.04;
+      const localBloom = clamp((bloom - stagger) / (1 - stagger), 0, 1);
+      const eased = Easing.easeOutCubic(localBloom);
+      inner.push(<Petal key={`i-${i}`} angle={angle} length={petalLen*0.62} width={petalWid*0.7} scale={eased} palette={palette} opacity={localBloom*0.95} />);
+    }
+  }
+  const centerBloom = clamp((bloom - 0.4) / 0.6, 0, 1);
+  const centerScale = Easing.easeOutBack(centerBloom);
+  return (
+    <g transform={`translate(${x} ${y}) rotate(${rotation + sway * 3})`} opacity={opacity} style={{ transformBox:'fill-box' }}>
+      {outer}{inner}
+      <circle cx={0} cy={0} r={size*0.13*centerScale} fill={`url(#centerGrad-${palette.id})`} opacity={0.95} />
+      {centerBloom > 0.4 && Array.from({length:8}).map((_,i) => {
+        const a = (i/8)*Math.PI*2; const r = size*0.07*centerScale;
+        return <circle key={`s-${i}`} cx={Math.cos(a)*r} cy={Math.sin(a)*r} r={size*0.012} fill={palette.centerOuter} opacity={0.8} />;
+      })}
+    </g>
+  );
+}
+
+function FlowerDefs() {
+  return (
+    <defs>
+      <filter id="flowerSoft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="1.2" /></filter>
+      {Object.entries(FLOWER_PALETTES).map(([id,p]) => (
+        <React.Fragment key={id}>
+          <radialGradient id={`petalGrad-${id}`} cx="50%" cy="35%" r="65%">
+            <stop offset="0%" stopColor={p.petalInner}/><stop offset="55%" stopColor={p.petalOuter}/><stop offset="100%" stopColor={p.petalEdge}/>
+          </radialGradient>
+          <radialGradient id={`centerGrad-${id}`} cx="40%" cy="40%" r="60%">
+            <stop offset="0%" stopColor="#fff5d8"/><stop offset="40%" stopColor={p.centerInner}/><stop offset="100%" stopColor={p.centerOuter}/>
+          </radialGradient>
+        </React.Fragment>
+      ))}
+    </defs>
+  );
+}
+
+// ── particles.jsx (inline) ───────────────────────────────────────────────
+function rand(i, seed=1) { const x=Math.sin(i*9301.97+seed*49297.13)*233280; return x-Math.floor(x); }
+
+function Bokeh({ count=22, w=1920, h=1080 }) {
+  const time = useTime();
+  const dots = [];
+  for (let i=0;i<count;i++) {
+    const baseX=rand(i,1)*w, baseY=rand(i,2)*h, r=60+rand(i,3)*180;
+    const speed=6+rand(i,4)*14, drift=(time/speed)*30, driftY=Math.sin(time/(3+rand(i,5)*4)+i)*18;
+    const opacity=0.08+rand(i,6)*0.18;
+    const hue=rand(i,7), color=hue<0.45?'#f8d8d0':hue<0.8?'#fbe6d4':'#e9b88a';
+    dots.push(<div key={i} style={{ position:'absolute', left:baseX+drift-r, top:baseY+driftY-r, width:r*2, height:r*2, borderRadius:'50%', background:`radial-gradient(circle, ${color} 0%, ${color}00 70%)`, opacity, filter:'blur(8px)' }} />);
+  }
+  return <>{dots}</>;
+}
+
+function FloatingPetals({ count=28, w=1920, h=1080 }) {
+  const time = useTime();
+  const petals = [];
+  for (let i=0;i<count;i++) {
+    const cycle=8+rand(i,11)*10, phase=rand(i,12)*cycle, t=((time+phase)%cycle)/cycle;
+    const xBase=rand(i,13)*w, sway=Math.sin(time*0.6+i*1.7)*60, x=xBase+sway, y=h+80-t*(h+160);
+    const size=14+rand(i,14)*28, rot=(rand(i,15)-0.5)*720+time*30*(rand(i,16)>0.5?1:-1);
+    const tilt=rand(i,17)*360, opacity=0.55+rand(i,18)*0.4;
+    const colorPick=rand(i,19);
+    const color=colorPick<0.5?'linear-gradient(135deg,#f8dcd4 0%,#e9a4a0 100%)':colorPick<0.85?'linear-gradient(135deg,#fbe6d4 0%,#e8c89a 100%)':'linear-gradient(135deg,#f4cdc6 0%,#c87878 100%)';
+    petals.push(
+      <div key={i} style={{ position:'absolute', left:x, top:y, width:size, height:size*1.5, transform:`rotate(${tilt}deg) rotateX(${rot}deg)`, opacity, pointerEvents:'none' }}>
+        <div style={{ width:'100%', height:'100%', background:color, borderRadius:'60% 60% 60% 60% / 80% 80% 40% 40%', boxShadow:'inset -2px -3px 6px rgba(160,80,80,0.15),inset 2px 3px 6px rgba(255,255,255,0.3)', filter:'blur(0.4px)' }} />
+      </div>
+    );
+  }
+  return <>{petals}</>;
+}
+
+function HeartShape({ size=32, color='#e89898', opacity=0.6 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 32 32" style={{ overflow:'visible' }}>
+      <defs><filter id={`hg${size}`} x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2"/></filter></defs>
+      <path d="M16 27.5 L4.5 16.2 C1 12.8 1 7.6 4.5 4.3 C8 1 13.4 1 16 5.4 C18.6 1 24 1 27.5 4.3 C31 7.6 31 12.8 27.5 16.2 Z" fill={color} opacity={opacity} />
+      <path d="M16 27.5 L4.5 16.2 C1 12.8 1 7.6 4.5 4.3 C8 1 13.4 1 16 5.4 C18.6 1 24 1 27.5 4.3 C31 7.6 31 12.8 27.5 16.2 Z" fill={color} opacity={opacity*0.5} filter={`url(#hg${size})`} />
+    </svg>
+  );
+}
+
+function FloatingHearts({ count=9, w=1920, h=1080 }) {
+  const time = useTime();
+  const hearts = [];
+  for (let i=0;i<count;i++) {
+    const cycle=11+rand(i,21)*7, phase=rand(i,22)*cycle, t=((time+phase)%cycle)/cycle;
+    const xBase=rand(i,23)*w, sway=Math.sin(time*0.5+i*2.1)*80, x=xBase+sway, y=h+60-t*(h+140);
+    const size=22+rand(i,24)*38, opacity=(0.25+rand(i,25)*0.35)*Math.sin(t*Math.PI);
+    const colorPick=rand(i,26), color=colorPick<0.5?'#e89898':colorPick<0.85?'#f0b8b0':'#d97a7a';
+    const wobble=Math.sin(time*1.2+i)*8;
+    hearts.push(<div key={i} style={{ position:'absolute', left:x-size/2, top:y, transform:`rotate(${wobble}deg)`, opacity, pointerEvents:'none' }}><HeartShape size={size} color={color} opacity={1}/></div>);
+  }
+  return <>{hearts}</>;
+}
+
+function LightDust({ count=70, w=1920, h=1080 }) {
+  const time = useTime();
+  const specks = [];
+  for (let i=0;i<count;i++) {
+    const cycle=6+rand(i,31)*8, phase=rand(i,32)*cycle, t=((time+phase)%cycle)/cycle;
+    const xBase=rand(i,33)*w, yBase=rand(i,34)*h, drift=Math.sin(time*0.4+i)*30;
+    const x=xBase+drift, y=yBase-t*80, size=1.5+rand(i,35)*3.5;
+    const twinkle=(Math.sin(time*2+i*1.3)+1)/2, opacity=(0.3+rand(i,36)*0.5)*twinkle;
+    const goldish=rand(i,37)>0.6;
+    specks.push(<div key={i} style={{ position:'absolute', left:x, top:y, width:size, height:size, borderRadius:'50%', background:goldish?'#fce5b0':'#fff4e8', boxShadow:goldish?'0 0 8px 2px rgba(252,229,176,0.7)':'0 0 6px 2px rgba(255,244,232,0.55)', opacity }} />);
+  }
+  return <>{specks}</>;
+}
+
+function LightRays({ w=1920, h=1080 }) {
+  const time = useTime();
+  const rays = [];
+  const cx=w*0.5, cy=-h*0.15;
+  for (let i=0;i<9;i++) {
+    const baseAngle=-90+(i-4)*11, wobble=Math.sin(time*0.3+i)*1.5, angle=baseAngle+wobble;
+    const len=h*1.4, width=60+rand(i,41)*70, opacity=0.06+(Math.sin(time*0.5+i*1.2)+1)*0.04;
+    rays.push(<div key={i} style={{ position:'absolute', left:cx, top:cy, width, height:len, marginLeft:-width/2, transform:`rotate(${angle}deg)`, transformOrigin:'top center', background:'linear-gradient(to bottom,rgba(255,228,180,0.55) 0%,rgba(255,228,180,0.18) 40%,rgba(255,228,180,0) 100%)', opacity, filter:'blur(14px)', pointerEvents:'none' }} />);
+  }
+  return <>{rays}</>;
+}
+
+function CenterGlow({ w=1920, h=1080 }) {
+  const time = useTime();
+  const breathe=(Math.sin(time*0.6)+1)/2, flicker=(Math.sin(time*1.7)+1)/2;
+  const cx=w*0.5, cy=h*0.5;
+  return (
+    <>
+      <div style={{ position:'absolute', left:cx-600, top:cy-600, width:1200, height:1200, borderRadius:'50%', background:'radial-gradient(circle,rgba(255,225,170,0.55) 0%,rgba(255,200,150,0.18) 35%,rgba(255,200,150,0) 70%)', opacity:0.65+breathe*0.25, filter:'blur(18px)', pointerEvents:'none' }} />
+      <div style={{ position:'absolute', left:cx-200, top:cy-200, width:400, height:400, borderRadius:'50%', background:'radial-gradient(circle,rgba(255,242,210,0.85) 0%,rgba(255,220,160,0.35) 50%,rgba(255,220,160,0) 80%)', opacity:0.55+flicker*0.25, mixBlendMode:'screen', pointerEvents:'none' }} />
+      <div style={{ position:'absolute', left:cx-700, top:cy-4, width:1400, height:8, background:'linear-gradient(to right,rgba(255,228,180,0) 0%,rgba(255,232,190,0.6) 50%,rgba(255,228,180,0) 100%)', filter:'blur(3px)', opacity:0.35+flicker*0.3, mixBlendMode:'screen', pointerEvents:'none' }} />
+    </>
+  );
+}
+
+function Vignette() {
+  return (
+    <>
+      <div style={{ position:'absolute', inset:0, background:'radial-gradient(ellipse at center,transparent 45%,rgba(80,40,40,0.28) 100%)', pointerEvents:'none' }} />
+      <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom,rgba(255,210,170,0.08) 0%,transparent 35%,transparent 70%,rgba(170,90,90,0.10) 100%)', mixBlendMode:'soft-light', pointerEvents:'none' }} />
+    </>
+  );
+}
+
+// ── scene.jsx (inline) ───────────────────────────────────────────────────
+const W = 1920, H = 1080, DURATION = 20;
+
+const MESSAGES = [
+  { line1:'Liebe Mama,', line2:'du bist unser Zuhause.', start:5.5,  end:10.0, size:88,  script:false },
+  { line1:'Danke',       line2:'für alles.',             start:10.5, end:14.5, size:100, script:false },
+  { line1:'Alles Gute',  line2:'zum Muttertag ❤',        start:15.0, end:19.5, size:120, script:true  },
+];
+
+function Background() {
+  const time = useTime();
+  const breathe=(Math.sin((time/DURATION)*Math.PI*2)+1)/2;
+  return (
+    <div style={{ position:'absolute', inset:0, background:`radial-gradient(ellipse at 50% 110%,#f0a8a0 0%,transparent 55%),radial-gradient(ellipse at 50% -10%,#ffe6cf 0%,transparent 50%),linear-gradient(180deg,#faecd8 0%,#f5d4c8 55%,#e9b9b1 100%)`, filter:`saturate(${0.95+breathe*0.1}) brightness(${0.98+breathe*0.04})` }} />
+  );
+}
+
+function PainterlyTexture() {
+  return <div style={{ position:'absolute', inset:0, background:`radial-gradient(circle at 22% 38%,rgba(255,220,200,0.18) 0%,transparent 22%),radial-gradient(circle at 78% 62%,rgba(220,150,140,0.16) 0%,transparent 25%),radial-gradient(circle at 30% 80%,rgba(240,200,160,0.12) 0%,transparent 30%),radial-gradient(circle at 70% 20%,rgba(250,220,180,0.18) 0%,transparent 28%)`, mixBlendMode:'soft-light', pointerEvents:'none' }} />;
+}
+
+function FlowerStage() {
+  const time = useTime();
+  const flowers = [
+    { x:W*0.22, y:H*0.62, size:320, paletteName:'blush',   petals:6, bloomStart:1.0, floatStart:9.5,  drift:-240, swayPhase:0.0 },
+    { x:W*0.78, y:H*0.62, size:320, paletteName:'rose',    petals:6, bloomStart:1.4, floatStart:9.8,  drift:-260, swayPhase:1.3 },
+    { x:W*0.10, y:H*0.40, size:220, paletteName:'cream',   petals:6, bloomStart:2.4, floatStart:10.2, drift:-300, swayPhase:2.1 },
+    { x:W*0.90, y:H*0.40, size:220, paletteName:'antique', petals:5, bloomStart:2.8, floatStart:10.4, drift:-300, swayPhase:0.8 },
+    { x:W*0.30, y:H*0.85, size:190, paletteName:'rose',    petals:5, bloomStart:3.4, floatStart:9.0,  drift:-160, swayPhase:2.7 },
+    { x:W*0.70, y:H*0.85, size:190, paletteName:'cream',   petals:6, bloomStart:3.6, floatStart:9.2,  drift:-160, swayPhase:1.9 },
+    { x:W*0.50, y:H*0.92, size:150, paletteName:'blush',   petals:6, bloomStart:4.2, floatStart:9.6,  drift:-140, swayPhase:0.4 },
+  ];
+  return (
+    <svg width="100%" height="100%" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice" style={{ position:'absolute', inset:0, overflow:'visible' }}>
+      <FlowerDefs />
+      {flowers.map((f,idx) => {
+        const bloom = clamp((time-f.bloomStart)/3.0,0,1);
+        const floatT = clamp((time-f.floatStart)/(DURATION-f.floatStart-0.5),0,1);
+        const floatEase = Easing.easeInOutSine(floatT);
+        const yOffset = floatEase*f.drift;
+        const xOffset = Math.sin(time*0.6+f.swayPhase)*20;
+        let opacity=1;
+        const fadeStart=DURATION-2.0;
+        if(time>fadeStart) opacity=1-Easing.easeInCubic(clamp((time-fadeStart)/2.0,0,1));
+        if(time<f.bloomStart) opacity*=0;
+        else if(time<f.bloomStart+0.6) opacity*=clamp((time-f.bloomStart)/0.6,0,1);
+        const sway=Math.sin(time*0.8+f.swayPhase)*(bloom>0.9?1:0);
+        const breathScale=1+Math.sin(time*0.4+idx)*0.012;
+        return (
+          <g key={idx} transform={`translate(${xOffset} ${yOffset}) scale(${breathScale})`} style={{ transformOrigin:`${f.x}px ${f.y}px`, transformBox:'fill-box' }}>
+            <Flower x={f.x} y={f.y} size={f.size} petals={f.petals} paletteName={f.paletteName} bloom={bloom} sway={sway} opacity={opacity} layered={f.size>180} />
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+function MessageBeat({ message }) {
+  const time = useTime();
+  const { line1, line2, start, end, size, script } = message;
+  if (time < start-0.05 || time > end+0.05) return null;
+  const local=time-start, total=end-start, entryDur=1.2, exitDur=1.0;
+  let opacity=1, translateY=0, blur=0;
+  if(local<entryDur){ const t=Easing.easeOutCubic(clamp(local/entryDur,0,1)); opacity=t; translateY=(1-t)*30; blur=(1-t)*8; }
+  else if(local>total-exitDur){ const t=Easing.easeInCubic(clamp((local-(total-exitDur))/exitDur,0,1)); opacity=1-t; translateY=-t*24; blur=t*6; }
+  const float=Math.sin(time*0.7)*4;
+  const baseFont=script?`'Pinyon Script','Cormorant Garamond',serif`:`'Cormorant Garamond',Georgia,serif`;
+  const fg='#fdf3e2', fgGlow='rgba(255,215,165,0.55)';
+  return (
+    <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', flexDirection:'column', pointerEvents:'none', opacity, transform:`translateY(${translateY+float}px)`, filter:`blur(${blur}px)` }}>
+      <div style={{ fontFamily:baseFont, fontSize:size, fontStyle:script?'normal':'italic', fontWeight:script?400:500, color:fg, textAlign:'center', lineHeight:1.05, textShadow:`0 0 24px ${fgGlow},0 0 60px rgba(255,200,150,0.35),0 4px 18px rgba(120,60,60,0.45)` }}>
+        <div style={{ opacity:0.95, fontSize:script?size*0.85:size }}>{line1}</div>
+        <div style={{ marginTop:script?8:4, fontSize:size }}>{line2}</div>
+      </div>
+      {script && <div style={{ marginTop:28, width:220, height:1, background:'linear-gradient(to right,transparent,rgba(255,220,180,0.7),transparent)' }} />}
+    </div>
+  );
+}
+
+function CameraPush({ children }) {
+  const time = useTime();
+  const wave=(1-Math.cos((time/DURATION)*Math.PI*2))/2;
+  const scale=1+wave*0.04;
+  return <div style={{ position:'absolute', inset:0, transform:`scale(${scale})`, transformOrigin:'50% 55%' }}>{children}</div>;
+}
+
+function MothersDayScene() {
+  return (
+    <>
+      <Background />
+      <div style={{ position:'absolute', inset:0, filter:'blur(2px)' }}><Bokeh count={26} w={W} h={H} /></div>
+      <CameraPush>
+        <LightRays w={W} h={H} />
+        <PainterlyTexture />
+        <FlowerStage />
+        <FloatingPetals count={32} w={W} h={H} />
+        <FloatingHearts count={10} w={W} h={H} />
+        <CenterGlow w={W} h={H} />
+        <LightDust count={75} w={W} h={H} />
+      </CameraPush>
+      {MESSAGES.map((m,i) => <MessageBeat key={i} message={m} />)}
+      <Vignette />
+      <div style={{ position:'absolute', inset:0, backgroundImage:`url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 0.95  0 0 0 0 0.85  0 0 0 0.18 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")`, opacity:0.18, mixBlendMode:'overlay', pointerEvents:'none' }} />
+    </>
+  );
+}
+
+function App() {
+  return (
+    <Stage duration={DURATION} background="#f5d4c8" loop={true} autoplay={true}>
+      <MothersDayScene />
+    </Stage>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('anim-root'));
+root.render(<App />);
+</script>
+
+<!-- ── Scroll Reveal ── -->
+<script>
+  const reveals = document.querySelectorAll('[data-reveal]');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
